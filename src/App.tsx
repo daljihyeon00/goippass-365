@@ -6,6 +6,7 @@ import { StudentTable } from './components/StudentTable';
 import { ScheduleModal } from './components/ScheduleModal';
 import { StudentEditModal } from './components/StudentEditModal';
 import { StudentAddModal } from './components/StudentAddModal';
+import { GuideView } from './components/GuideView';
 import { supabase } from './lib/supabase';
 import { exportStudentsToCSV } from './utils/exportCsv';
 import type { GoipClass, GoipStudent, GoipSchedule } from './types';
@@ -15,6 +16,9 @@ export function App() {
   const [currentClass, setCurrentClass] = useState<GoipClass | null>(null);
   const [students, setStudents] = useState<GoipStudent[]>([]);
   const [schedules, setSchedules] = useState<GoipSchedule[]>([]);
+
+  // Active view: 'table' (Master table) or 'guide' (Admission handbook & rules)
+  const [activeView, setActiveView] = useState<'table' | 'guide'>('table');
 
   // Modals
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
@@ -109,6 +113,7 @@ export function App() {
       setCurrentClass(null);
       setStudents([]);
       setSchedules([]);
+      setActiveView('table');
       window.history.pushState({}, '', window.location.pathname);
     }
   };
@@ -128,9 +133,12 @@ export function App() {
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
       <Header
         currentClass={currentClass}
+        activeView={activeView}
         warningCount={doubleViolationCount}
+        onSelectView={(v) => setActiveView(v)}
+        onOpenSchedule={() => setIsScheduleOpen(true)}
         onOpenWarnings={() => {
-          // auto scroll to table
+          setActiveView('table');
           window.scrollTo({ top: 300, behavior: 'smooth' });
         }}
         onLeave={classCode ? handleLeave : undefined}
@@ -147,24 +155,30 @@ export function App() {
             </div>
           </div>
         ) : (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-            {/* Dashboard Stats */}
-            <DashboardStats
-              students={students}
-              schedules={schedules}
-              onOpenSchedule={() => setIsScheduleOpen(true)}
-              onFilterStatus={() => {}}
-            />
+          <div>
+            {activeView === 'table' ? (
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+                {/* Dashboard Stats */}
+                <DashboardStats
+                  students={students}
+                  schedules={schedules}
+                  onOpenSchedule={() => setIsScheduleOpen(true)}
+                  onFilterStatus={() => {}}
+                />
 
-            {/* Students Table */}
-            <StudentTable
-              students={students}
-              classCode={classCode}
-              onEditStudent={(s) => setEditingStudent(s)}
-              onAddStudent={() => setIsAddStudentOpen(true)}
-              onExportCSV={handleExport}
-              onRefresh={() => fetchClassData(classCode)}
-            />
+                {/* Students Master Table */}
+                <StudentTable
+                  students={students}
+                  classCode={classCode}
+                  onEditStudent={(s) => setEditingStudent(s)}
+                  onAddStudent={() => setIsAddStudentOpen(true)}
+                  onExportCSV={handleExport}
+                  onRefresh={() => fetchClassData(classCode)}
+                />
+              </div>
+            ) : (
+              <GuideView />
+            )}
           </div>
         )}
       </main>
