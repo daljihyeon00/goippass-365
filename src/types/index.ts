@@ -23,6 +23,15 @@ export interface GoipSchedule {
   apply_end_date: string;
   interview_date?: string | null;
   result_date?: string | null;
+  
+  // 1·2·3차 단계별 전형 일정 (특목고, 외고, 자사고 등)
+  stage1_name?: string | null; // 예: 1차 서류/내신 선발
+  stage1_date?: string | null; // 1차 발표일
+  stage2_name?: string | null; // 예: 2차 심층 면접평가
+  stage2_date?: string | null; // 2차 면접/발표일
+  stage3_name?: string | null; // 예: 3차 최종 합격자 발표
+  stage3_date?: string | null; // 최종 발표일
+  
   notes?: string | null;
   created_at: string;
 }
@@ -39,7 +48,10 @@ export type LateStatus =
   | 'ready'         // 작성대기
   | 'writing'       // 원서작성중
   | 'submitted'     // 접수완료
-  | 'assigned';     // 배정/최종합격
+  | 'first_passed'  // 1차 서류통과 (특목/자사)
+  | 'second_passed' // 2차 면접통과 (특목/자사)
+  | 'assigned'      // 배정완료 / 최종합격
+  | 'rejected';     // 불합격
 
 export interface GoipStudent {
   id: string;
@@ -68,14 +80,21 @@ export interface GoipStudent {
   early_status: EarlyStatus;
   early_docs_checked: boolean;
   
-  // 후기고 지원 현황
-  late_school_1?: string | null;
-  late_school_2?: string | null;
+  // 후기고 지원 현황 (1지망 ~ 4지망)
+  late_school_1?: string | null; // 후기고 1지망 (광역 1지망 또는 특목/자사)
+  late_school_2?: string | null; // 후기고 2지망 (광역 2지망)
+  late_school_3?: string | null; // 후기고 3지망 (지역 1지망)
+  late_school_4?: string | null; // 후기고 4지망 (지역 2지망)
   late_apply_type?: string | null;
   late_apply_date?: string | null;
   late_deadline?: string | null;
   late_status: LateStatus;
   late_assigned_school?: string | null;
+  
+  // 특목고/외고/자사고 단계별 전형 결과
+  stage1_result?: '대기' | '합격' | '불합격' | string;
+  stage2_result?: '대기' | '합격' | '불합격' | string;
+  stage3_result?: '대기' | '최종합격' | '불합격' | string;
   
   // 상담 및 부모 동의
   parent_agreed: boolean;

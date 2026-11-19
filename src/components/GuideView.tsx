@@ -121,6 +121,14 @@ export const GuideView: React.FC = () => {
             </div>
 
             {/* 3 Steps Visual Flow */}
+            <div className="bg-indigo-900 text-white p-4 rounded-2xl mb-2 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-1 bg-amber-400 text-slate-900 text-xs font-black rounded-lg">후기고 4개 지망</span>
+                <span className="text-xs sm:text-sm font-bold">1·2지망 = 광역학군(시/도 전역) | 3·4지망 = 지역학군(거주지 관할)</span>
+              </div>
+              <span className="hidden sm:inline-block text-xs text-indigo-200">총 4개 학교 분산 지원 가능</span>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Step 1 */}
               <div className="p-5 rounded-2xl bg-indigo-50/70 border border-indigo-200/80 space-y-3 relative overflow-hidden">
@@ -128,14 +136,14 @@ export const GuideView: React.FC = () => {
                   1단계
                 </span>
                 <h4 className="font-extrabold text-slate-900 text-base">
-                  광역학군 배정 (40~50%)
+                  광역학군 배정 (후기고 1·2지망)
                 </h4>
                 <p className="text-xs text-slate-600 leading-relaxed font-medium">
                   <strong>거주지 학군에 상관없이 시/도 전체</strong> 평준화 일반고 중 
                   학생이 가장 희망하는 학교 <strong>2개교(1지망, 2지망)</strong>를 선택 지원합니다.
                 </p>
                 <div className="p-3 bg-white rounded-xl border border-indigo-100 text-[11px] text-indigo-900 font-semibold">
-                  📌 예: 강서구 명지동 학생도 해운대구, 남구, 부산진구 등 시 전역 고교 지원 가능
+                  📌 예: 강서구 명지동 학생도 해운대구, 남구, 부산진구 등 시 전역 고교 1·2지망 가능
                 </div>
               </div>
 
@@ -145,13 +153,13 @@ export const GuideView: React.FC = () => {
                   2단계
                 </span>
                 <h4 className="font-extrabold text-slate-900 text-base">
-                  지역학군 배정 (40~50%)
+                  지역학군 배정 (후기고 3·4지망)
                 </h4>
                 <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                  1단계에서 배정받지 못한 학생들을 대상으로, <strong>학생 주민등록등본상 주소지가 속한 거주지 학교군</strong> 내 고교 중 <strong>2개교(1지망, 2지망)</strong>를 지원합니다.
+                  1단계에서 배정받지 못한 학생들을 대상으로, <strong>학생 주민등록등본상 주소지가 속한 거주지 학교군</strong> 내 고교 중 <strong>2개교(3지망, 4지망)</strong>를 지원합니다.
                 </p>
                 <div className="p-3 bg-white rounded-xl border border-sky-100 text-[11px] text-sky-900 font-semibold">
-                  📌 예: 서부학군 학생은 서부학교군(사하구·강서구·서구) 내 일반고만 기재 가능
+                  📌 예: 서부학군 학생은 서부학교군(사하구·강서구·서구) 내 일반고만 3·4지망에 기재
                 </div>
               </div>
 
@@ -345,12 +353,57 @@ export const GuideView: React.FC = () => {
                     • 자사고/외고에 지원하면 <strong>1단계(광역학군) 일반고 지원 자격은 자동 소멸</strong>됩니다.
                   </li>
                   <li>
-                    • 불합격할 경우 <strong>2단계(지역학군)부터 일반고 추첨에 참여</strong>하게 되므로, 지역학군 1지망에 쓴 학교도 정원이 차 있으면 3단계 임의배정으로 넘어갈 수 있습니다.
+                    • 불합격할 경우 <strong>2단계(지역학군 3·4지망)부터 일반고 추첨에 참여</strong>하게 되므로, 지역학군 지망에 쓴 학교도 정원이 차 있으면 3단계 임의배정으로 넘어갈 수 있습니다.
                   </li>
                   <li>
-                    • 따라서 자사고/외고를 지원하는 학생에게는 지역학군 일반고 2지망을 신중하고 안정적으로 고르도록 상담해야 합니다.
+                    • 따라서 자사고/외고를 지원하는 학생에게는 지역학군 일반고 3·4지망을 신중하고 안정적으로 고르도록 상담해야 합니다.
                   </li>
                 </ul>
+              </div>
+            </div>
+
+            {/* 특목고·외고·자사고 1·2·3차 전형 구조 안내 */}
+            <div className="p-6 rounded-2xl bg-purple-50/70 border border-purple-200/80 space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="font-black text-sm text-purple-950 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-lg bg-purple-600 text-white text-xs flex items-center justify-center font-bold">★</span>
+                  특목고(외고·국제고·과고) 및 자율형사립고(자사고) 1·2·3차 다단계 전형 절차
+                </h4>
+                <span className="text-[11px] font-bold text-purple-700 bg-white px-2.5 py-1 rounded-full border border-purple-200">
+                  단계별 탈락/합격 관리
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                <div className="bg-white p-4 rounded-xl border border-purple-100 space-y-1.5 shadow-2xs">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 font-black text-[11px]">1차 전형</span>
+                    <strong className="text-slate-900">서류 평가 & 내신 선발</strong>
+                  </div>
+                  <p className="text-slate-600 text-[11px] leading-relaxed">
+                    중학교 교과 성취도(외고: 영어, 과고: 수학·과학)와 출결 감점을 합산하여 <strong>모집정원의 1.5배수 ~ 2배수</strong>를 1차 합격자로 선발합니다.
+                  </p>
+                </div>
+
+                <div className="bg-white p-4 rounded-xl border border-purple-100 space-y-1.5 shadow-2xs">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 font-black text-[11px]">2차 전형</span>
+                    <strong className="text-slate-900">심층 면접 & 실기평가</strong>
+                  </div>
+                  <p className="text-slate-600 text-[11px] leading-relaxed">
+                    1차 합격자를 대상으로 자기소개서, 학교생활기록부 기반 <strong>자기주도학습영역 및 인성영역 개별 심층 면접</strong>을 실시합니다.
+                  </p>
+                </div>
+
+                <div className="bg-white p-4 rounded-xl border border-purple-100 space-y-1.5 shadow-2xs">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-black text-[11px]">3차 전형</span>
+                    <strong className="text-slate-900">최종 합격자 사정/발표</strong>
+                  </div>
+                  <p className="text-slate-600 text-[11px] leading-relaxed">
+                    <strong>1차 성적 + 2차 면접 점수</strong>를 합산하여 최종 합격자를 결정합니다. 최종 합격 시 후기고 등록이 확정되며, 불합격자는 일반고 동시지원 추첨에 참가합니다.
+                  </p>
+                </div>
               </div>
             </div>
           </div>

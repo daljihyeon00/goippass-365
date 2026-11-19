@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, UserPlus } from 'lucide-react';
+import { X, UserPlus, Layers } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { sound } from '../utils/sound';
 
@@ -21,10 +21,14 @@ export const StudentAddModal: React.FC<StudentAddModalProps> = ({
   const [gender, setGender] = useState<'M' | 'F'>('M');
   const [gpaPercent, setGpaPercent] = useState('');
   const [gpaScore, setGpaScore] = useState('');
-  const [hope1, setHope1] = useState('');
-  const [hope2, setHope2] = useState('');
   const [earlySchool, setEarlySchool] = useState('');
-  const [lateSchool, setLateSchool] = useState('');
+  
+  // Late admissions 4 choices
+  const [lateSchool1, setLateSchool1] = useState('');
+  const [lateSchool2, setLateSchool2] = useState('');
+  const [lateSchool3, setLateSchool3] = useState('');
+  const [lateSchool4, setLateSchool4] = useState('');
+
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,12 +44,18 @@ export const StudentAddModal: React.FC<StudentAddModalProps> = ({
         gender,
         gpa_percent: gpaPercent !== '' ? Number(gpaPercent) : null,
         gpa_score: gpaScore !== '' ? Number(gpaScore) : null,
-        hope_school_1: hope1.trim() || null,
-        hope_school_2: hope2.trim() || null,
+        hope_school_1: lateSchool1.trim() || earlySchool.trim() || null,
+        hope_school_2: lateSchool2.trim() || null,
         early_school: earlySchool.trim() || null,
         early_status: earlySchool.trim() ? 'writing' : 'none',
-        late_school_1: lateSchool.trim() || null,
+        late_school_1: lateSchool1.trim() || null,
+        late_school_2: lateSchool2.trim() || null,
+        late_school_3: lateSchool3.trim() || null,
+        late_school_4: lateSchool4.trim() || null,
         late_status: 'ready',
+        stage1_result: '대기',
+        stage2_result: '대기',
+        stage3_result: '대기',
         parent_agreed: false,
       });
 
@@ -64,7 +74,7 @@ export const StudentAddModal: React.FC<StudentAddModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-8 relative border border-slate-100 animate-in zoom-in-95 duration-150">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-8 relative border border-slate-100 max-h-[92vh] overflow-y-auto animate-in zoom-in-95 duration-150">
         <div className="flex items-center justify-between pb-4 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
@@ -72,7 +82,7 @@ export const StudentAddModal: React.FC<StudentAddModalProps> = ({
             </div>
             <div>
               <h3 className="text-lg font-black text-slate-900">새 학생 등록</h3>
-              <p className="text-xs text-slate-500">기본 인적사항 및 초기 희망 학교 입력</p>
+              <p className="text-xs text-slate-500">기본 인적사항 및 전기·후기 지망 학교(1~4지망) 입력</p>
             </div>
           </div>
 
@@ -135,7 +145,7 @@ export const StudentAddModal: React.FC<StudentAddModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">내신 총점 (선택)</label>
+              <label className="block text-xs font-bold text-slate-700 mb-1">내신 총점</label>
               <input
                 type="number"
                 step="0.01"
@@ -147,51 +157,66 @@ export const StudentAddModal: React.FC<StudentAddModalProps> = ({
             </div>
           </div>
 
-          <div className="space-y-2 pt-2 border-t border-slate-100">
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">1지망 희망학교</label>
-                <input
-                  type="text"
-                  placeholder="예: 부산소마고 또는 명지고"
-                  value={hope1}
-                  onChange={(e) => setHope1(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 rounded-xl border border-slate-300 text-xs"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">2지망 희망학교</label>
-                <input
-                  type="text"
-                  placeholder="예: 신호고"
-                  value={hope2}
-                  onChange={(e) => setHope2(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 rounded-xl border border-slate-300 text-xs"
-                />
-              </div>
+          <div className="space-y-3 pt-2 border-t border-slate-100">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">전기고 지원 계획</label>
+              <input
+                type="text"
+                placeholder="예: 부산소마고 (미지원 시 공란)"
+                value={earlySchool}
+                onChange={(e) => setEarlySchool(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-50 rounded-xl border border-slate-300 text-xs"
+              />
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">전기고 지원 계획</label>
-                <input
-                  type="text"
-                  placeholder="예: 부산소마고 (미지원 시 공란)"
-                  value={earlySchool}
-                  onChange={(e) => setEarlySchool(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 rounded-xl border border-slate-300 text-xs"
-                />
-              </div>
+            {/* Late 4 Choices */}
+            <div className="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-2">
+              <label className="block text-xs font-black text-indigo-950 flex items-center gap-1">
+                <Layers className="w-3.5 h-3.5 text-indigo-600" />
+                후기고 1지망 ~ 4지망 계획 (총 4개 학교)
+              </label>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">후기고 1지망 계획</label>
-                <input
-                  type="text"
-                  placeholder="예: 명지고 (일반고)"
-                  value={lateSchool}
-                  onChange={(e) => setLateSchool(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 rounded-xl border border-slate-300 text-xs"
-                />
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-600 mb-0.5">후기 1지망 (광역 1 or 특목/자사)</label>
+                  <input
+                    type="text"
+                    placeholder="예: 부산외고 또는 명지고"
+                    value={lateSchool1}
+                    onChange={(e) => setLateSchool1(e.target.value)}
+                    className="w-full px-2.5 py-1.5 bg-white rounded-lg border border-slate-300 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-600 mb-0.5">후기 2지망 (광역 2지망)</label>
+                  <input
+                    type="text"
+                    placeholder="예: 신호고"
+                    value={lateSchool2}
+                    onChange={(e) => setLateSchool2(e.target.value)}
+                    className="w-full px-2.5 py-1.5 bg-white rounded-lg border border-slate-300 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-600 mb-0.5">후기 3지망 (지역학군 1지망)</label>
+                  <input
+                    type="text"
+                    placeholder="예: 경일고"
+                    value={lateSchool3}
+                    onChange={(e) => setLateSchool3(e.target.value)}
+                    className="w-full px-2.5 py-1.5 bg-white rounded-lg border border-slate-300 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-600 mb-0.5">후기 4지망 (지역학군 2지망)</label>
+                  <input
+                    type="text"
+                    placeholder="예: 부경고"
+                    value={lateSchool4}
+                    onChange={(e) => setLateSchool4(e.target.value)}
+                    className="w-full px-2.5 py-1.5 bg-white rounded-lg border border-slate-300 text-xs"
+                  />
+                </div>
               </div>
             </div>
           </div>

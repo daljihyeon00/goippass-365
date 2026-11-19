@@ -12,9 +12,11 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
-  Sparkles
+  Sparkles,
+  Layers,
+  Award
 } from 'lucide-react';
-import type { GoipStudent, EarlyStatus, LateStatus } from '../types';
+import type { GoipStudent, EarlyStatus } from '../types';
 import { supabase } from '../lib/supabase';
 import { sound } from '../utils/sound';
 
@@ -61,90 +63,144 @@ export const StudentTable: React.FC<StudentTableProps> = ({
     switch (status) {
       case 'accepted':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 text-[11px] font-extrabold border border-emerald-300 shadow-2xs">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-emerald-100 text-emerald-800 text-[10px] font-extrabold border border-emerald-300 shadow-2xs">
             <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-            최종합격 ({schoolName})
+            최종합격 {schoolName ? `(${schoolName})` : ''}
           </span>
         );
       case 'first_passed':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-100 text-purple-800 text-[11px] font-bold border border-purple-200">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-purple-100 text-purple-800 text-[10px] font-bold border border-purple-200">
             <Sparkles className="w-3 h-3 text-purple-600" />
-            1차합격 ({schoolName})
+            1차합격 {schoolName ? `(${schoolName})` : ''}
           </span>
         );
       case 'submitted':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-sky-100 text-sky-800 text-[11px] font-bold">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-sky-100 text-sky-800 text-[10px] font-bold">
             <FileCheck2 className="w-3 h-3 text-sky-600" />
             접수완료
           </span>
         );
       case 'writing':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-100 text-amber-800 text-[11px] font-bold">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-100 text-amber-800 text-[10px] font-bold">
             <Clock className="w-3 h-3 text-amber-600" />
             작성중
           </span>
         );
       case 'rejected':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-rose-50 text-rose-700 text-[11px] font-medium border border-rose-200">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-rose-50 text-rose-700 text-[10px] font-medium border border-rose-200">
             <XCircle className="w-3 h-3 text-rose-500" />
             불합격
           </span>
         );
       default:
-        return <span className="text-[11px] text-slate-400 font-medium">미지원</span>;
+        return <span className="text-[10px] text-slate-400 font-medium">미지원</span>;
     }
   };
 
-  const renderLateBadge = (status: LateStatus, schoolName?: string | null) => {
-    switch (status) {
-      case 'assigned':
+  const renderLateBadge = (student: GoipStudent) => {
+    const { late_status, late_assigned_school, stage1_result, stage2_result, stage3_result } = student;
+
+    // If special / autonomous school has stage results
+    const hasStages = stage1_result !== '대기' || stage2_result !== '대기' || stage3_result !== '대기';
+
+    if (late_status === 'assigned') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-emerald-100 text-emerald-800 text-[10px] font-extrabold border border-emerald-200">
+          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+          배정완료 {late_assigned_school ? `(${late_assigned_school})` : ''}
+        </span>
+      );
+    }
+
+    if (hasStages) {
+      if (stage3_result === '최종합격') {
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 text-[11px] font-extrabold border border-emerald-200">
-            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-            배정완료 {schoolName ? `(${schoolName})` : ''}
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">
+            <Award className="w-3 h-3 text-emerald-600" />
+            3차최종합격
           </span>
         );
+      }
+      if (stage2_result === '합격') {
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-purple-100 text-purple-800 text-[10px] font-bold">
+            <Sparkles className="w-3 h-3 text-purple-600" />
+            2차면접합격
+          </span>
+        );
+      }
+      if (stage1_result === '합격') {
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-indigo-100 text-indigo-800 text-[10px] font-bold">
+            <CheckCircle2 className="w-3 h-3 text-indigo-600" />
+            1차서류통과
+          </span>
+        );
+      }
+      if (stage1_result === '불합격' || stage2_result === '불합격' || stage3_result === '불합격') {
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-rose-50 text-rose-700 text-[10px] font-medium border border-rose-200">
+            <XCircle className="w-3 h-3 text-rose-500" />
+            탈락(일반고배정)
+          </span>
+        );
+      }
+    }
+
+    switch (late_status) {
       case 'submitted':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-indigo-100 text-indigo-800 text-[11px] font-bold">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-indigo-100 text-indigo-800 text-[10px] font-bold">
             <FileCheck2 className="w-3 h-3 text-indigo-600" />
-            원서접수완료
+            접수완료
           </span>
         );
       case 'writing':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-100 text-amber-800 text-[11px] font-bold">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-100 text-amber-800 text-[10px] font-bold">
             <Clock className="w-3 h-3 text-amber-600" />
-            원서작성중
+            작성중
           </span>
         );
       default:
-        return <span className="text-[11px] text-slate-400 font-medium">대기</span>;
+        return <span className="text-[10px] text-slate-400 font-medium">대기</span>;
     }
   };
 
   // Filter & Search
   const filteredStudents = students
     .filter((s) => {
-      // Search
       const matchSearch =
         s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         String(s.student_num).includes(searchTerm) ||
         (s.hope_school_1 && s.hope_school_1.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (s.early_school && s.early_school.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (s.late_school_1 && s.late_school_1.toLowerCase().includes(searchTerm.toLowerCase()));
+        (s.late_school_1 && s.late_school_1.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (s.late_school_2 && s.late_school_2.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (s.late_school_3 && s.late_school_3.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (s.late_school_4 && s.late_school_4.toLowerCase().includes(searchTerm.toLowerCase()));
 
       if (!matchSearch) return false;
 
-      // Filter
       if (filterType === 'early') return s.early_status !== 'none';
       if (filterType === 'accepted') return s.early_status === 'accepted';
-      if (filterType === 'late') return s.late_status === 'submitted' || s.late_status === 'assigned';
-      if (filterType === 'pending') return s.early_status === 'none' && s.late_status === 'ready';
+      if (filterType === 'late') return s.late_status === 'submitted' || s.late_status === 'assigned' || Boolean(s.late_school_1);
+      if (filterType === 'special') {
+        return (
+          s.late_apply_type?.includes('특목') ||
+          s.late_apply_type?.includes('자사') ||
+          s.late_apply_type?.includes('외고') ||
+          s.late_school_1?.includes('외국어') ||
+          s.late_school_1?.includes('자사') ||
+          s.late_school_1?.includes('해운대') ||
+          s.late_school_1?.includes('청운')
+        );
+      }
+      if (filterType === 'pending') return s.early_status === 'none' && s.late_status === 'ready' && !s.late_school_1;
 
       return true;
     })
@@ -200,7 +256,15 @@ export const StudentTable: React.FC<StudentTableProps> = ({
                 filterType === 'accepted' ? 'bg-white text-emerald-700 shadow-2xs' : 'hover:text-slate-900'
               }`}
             >
-              최종합격 ({students.filter((s) => s.early_status === 'accepted').length})
+              전기합격 ({students.filter((s) => s.early_status === 'accepted').length})
+            </button>
+            <button
+              onClick={() => setFilterType('special')}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer shrink-0 ${
+                filterType === 'special' ? 'bg-white text-indigo-700 shadow-2xs' : 'hover:text-slate-900'
+              }`}
+            >
+              특목/자사고 단계별
             </button>
             <button
               onClick={() => setFilterType('late')}
@@ -208,15 +272,7 @@ export const StudentTable: React.FC<StudentTableProps> = ({
                 filterType === 'late' ? 'bg-white text-indigo-700 shadow-2xs' : 'hover:text-slate-900'
               }`}
             >
-              후기고접수 ({students.filter((s) => s.late_status === 'submitted' || s.late_status === 'assigned').length})
-            </button>
-            <button
-              onClick={() => setFilterType('pending')}
-              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer shrink-0 ${
-                filterType === 'pending' ? 'bg-white text-amber-700 shadow-2xs' : 'hover:text-slate-900'
-              }`}
-            >
-              상담요망 ({students.filter((s) => s.early_status === 'none' && s.late_status === 'ready').length})
+              후기고 (1~4지망)
             </button>
           </div>
         </div>
@@ -260,21 +316,25 @@ export const StudentTable: React.FC<StudentTableProps> = ({
         <table className="w-full text-left border-collapse text-xs">
           <thead>
             <tr className="bg-slate-100/90 text-slate-700 font-extrabold border-b border-slate-200">
-              <th className="py-3 px-3 w-14 text-center">번호</th>
-              <th className="py-3 px-3 min-w-[90px]">이름</th>
-              <th className="py-3 px-3 min-w-[110px]">내신 성적</th>
-              <th className="py-3 px-3 min-w-[150px]">희망 학교 (1·2·3지망)</th>
-              <th className="py-3 px-3 min-w-[180px]">전기고 원서 지원 (특성화/과고/마이스터)</th>
-              <th className="py-3 px-3 min-w-[180px]">후기고 원서 지원 (일반고/외고/자사고)</th>
-              <th className="py-3 px-3 min-w-[90px] text-center">학부모동의</th>
-              <th className="py-3 px-3 min-w-[150px]">상담 및 비고</th>
-              <th className="py-3 px-3 w-20 text-center">관리</th>
+              <th className="py-3 px-3 w-12 text-center">번호</th>
+              <th className="py-3 px-3 min-w-[85px]">이름</th>
+              <th className="py-3 px-3 min-w-[100px]">내신 성적</th>
+              <th className="py-3 px-3 min-w-[170px]">전기고 원서 지원 (과고/마이스터/특성화)</th>
+              <th className="py-3 px-3 min-w-[240px]">
+                <div className="flex items-center gap-1">
+                  <Layers className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>후기고 원서 지원 (1~4지망 & 1·2·3차 전형)</span>
+                </div>
+              </th>
+              <th className="py-3 px-3 min-w-[80px] text-center">학부모동의</th>
+              <th className="py-3 px-3 min-w-[140px]">상담 및 비고</th>
+              <th className="py-3 px-3 w-16 text-center">관리</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {filteredStudents.length === 0 ? (
               <tr>
-                <td colSpan={9} className="py-12 text-center text-slate-400">
+                <td colSpan={8} className="py-12 text-center text-slate-400">
                   <School className="w-10 h-10 mx-auto mb-2 text-slate-200" />
                   <p className="text-sm font-semibold">조건에 맞는 학생 정보가 없습니다.</p>
                 </td>
@@ -318,31 +378,13 @@ export const StudentTable: React.FC<StudentTableProps> = ({
                           <span className="font-mono font-black text-indigo-700 text-sm">
                             {s.gpa_percent}%
                           </span>
-                          <div className="text-[11px] text-slate-400 flex items-center gap-1">
+                          <div className="text-[10px] text-slate-400 flex items-center gap-1">
                             {s.rank_in_school && <span>{s.rank_in_school}등</span>}
                             {s.gpa_score != null && <span>({s.gpa_score}점)</span>}
                           </div>
                         </div>
                       ) : (
                         <span className="text-slate-400 font-medium">산출전</span>
-                      )}
-                    </td>
-
-                    {/* Hope schools */}
-                    <td className="py-3 px-3">
-                      {s.hope_school_1 ? (
-                        <div className="space-y-0.5">
-                          <p className="font-bold text-slate-800 truncate max-w-[140px]">
-                            1지망: {s.hope_school_1}
-                          </p>
-                          {s.hope_school_2 && (
-                            <p className="text-[11px] text-slate-400 truncate max-w-[140px]">
-                              2지망: {s.hope_school_2}
-                            </p>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-slate-400">희망 미기재</span>
                       )}
                     </td>
 
@@ -357,8 +399,8 @@ export const StudentTable: React.FC<StudentTableProps> = ({
                             {renderEarlyBadge(s.early_status)}
                           </div>
                           {s.early_major && (
-                            <p className="text-[11px] text-slate-500 truncate">
-                              학과: {s.early_major} ({s.early_apply_type || '일반전형'})
+                            <p className="text-[10px] text-slate-500 truncate">
+                              {s.early_major} ({s.early_apply_type || '일반전형'})
                             </p>
                           )}
                           {s.early_apply_date && (
@@ -372,37 +414,76 @@ export const StudentTable: React.FC<StudentTableProps> = ({
                       )}
                     </td>
 
-                    {/* Late Admission Status & Dates */}
+                    {/* Late Admission: 4 CHOICES & 1·2·3 STAGES */}
                     <td className="py-3 px-3">
-                      {s.late_school_1 ? (
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-slate-900 truncate max-w-[130px]">
-                              {s.late_school_1}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2">
+                          {renderLateBadge(s)}
+                          {s.late_apply_type && (
+                            <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded">
+                              {s.late_apply_type}
                             </span>
-                            {renderLateBadge(s.late_status, s.late_assigned_school)}
-                          </div>
-                          {s.late_school_2 && (
-                            <p className="text-[11px] text-slate-500 truncate">
-                              2지망: {s.late_school_2} ({s.late_apply_type || '일반고 평준화'})
-                            </p>
-                          )}
-                          {s.late_apply_date && (
-                            <p className="text-[10px] text-indigo-700 font-mono">
-                              원서접수: {s.late_apply_date} (마감 {s.late_deadline || '-'})
-                            </p>
                           )}
                         </div>
-                      ) : (
-                        <span className="text-slate-400">대기중</span>
-                      )}
+
+                        {/* 4 Choices Badges */}
+                        <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[11px]">
+                          {s.late_school_1 ? (
+                            <span className="text-indigo-900 font-bold truncate" title={`1지망: ${s.late_school_1}`}>
+                              <span className="text-indigo-600 font-extrabold mr-1">1지망:</span>
+                              {s.late_school_1}
+                            </span>
+                          ) : (
+                            <span className="text-slate-300">1지망: -</span>
+                          )}
+
+                          {s.late_school_2 ? (
+                            <span className="text-indigo-900 font-medium truncate" title={`2지망: ${s.late_school_2}`}>
+                              <span className="text-indigo-600 font-bold mr-1">2지망:</span>
+                              {s.late_school_2}
+                            </span>
+                          ) : (
+                            <span className="text-slate-300">2지망: -</span>
+                          )}
+
+                          {s.late_school_3 ? (
+                            <span className="text-sky-900 font-medium truncate" title={`3지망: ${s.late_school_3}`}>
+                              <span className="text-sky-600 font-bold mr-1">3지망:</span>
+                              {s.late_school_3}
+                            </span>
+                          ) : (
+                            <span className="text-slate-300">3지망: -</span>
+                          )}
+
+                          {s.late_school_4 ? (
+                            <span className="text-sky-900 font-medium truncate" title={`4지망: ${s.late_school_4}`}>
+                              <span className="text-sky-600 font-bold mr-1">4지망:</span>
+                              {s.late_school_4}
+                            </span>
+                          ) : (
+                            <span className="text-slate-300">4지망: -</span>
+                          )}
+                        </div>
+
+                        {/* Stage details for Special / Autonomous schools */}
+                        {(s.stage1_result !== '대기' || s.stage2_result !== '대기' || s.stage3_result !== '대기') && (
+                          <div className="flex items-center gap-1 text-[10px] text-slate-500 pt-0.5">
+                            <span className="font-semibold text-slate-600">단계별:</span>
+                            <span className="px-1 py-0.2 rounded bg-slate-100">1차 {s.stage1_result}</span>
+                            <span>→</span>
+                            <span className="px-1 py-0.2 rounded bg-slate-100">2차 {s.stage2_result}</span>
+                            <span>→</span>
+                            <span className="px-1 py-0.2 rounded bg-slate-100">3차 {s.stage3_result}</span>
+                          </div>
+                        )}
+                      </div>
                     </td>
 
                     {/* Parent Agreed */}
                     <td className="py-3 px-3 text-center">
                       <button
                         onClick={() => handleToggleParentAgreed(s)}
-                        className={`text-xs px-2 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                        className={`text-[11px] px-2 py-1 rounded-lg font-bold transition-all cursor-pointer ${
                           s.parent_agreed
                             ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                             : 'bg-slate-100 text-slate-400 hover:text-slate-600'
@@ -416,7 +497,7 @@ export const StudentTable: React.FC<StudentTableProps> = ({
                     {/* Notes / Counseling */}
                     <td className="py-3 px-3">
                       {s.counseling_notes ? (
-                        <p className="text-slate-600 truncate max-w-[140px]" title={s.counseling_notes}>
+                        <p className="text-slate-600 truncate max-w-[130px]" title={s.counseling_notes}>
                           {s.counseling_notes}
                         </p>
                       ) : (

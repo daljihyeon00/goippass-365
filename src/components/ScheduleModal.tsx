@@ -29,13 +29,23 @@ export const ScheduleModal: React.FC<ScheduleModalProps> = ({
 
   // Form states
   const [category, setCategory] = useState<'early' | 'late'>('early');
-  const [schoolType, setSchoolType] = useState('특성화고(특별)');
+  const [schoolType, setSchoolType] = useState('특목고(외고·국제고)');
   const [schoolName, setSchoolName] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [interviewDate, setInterviewDate] = useState('');
   const [resultDate, setResultDate] = useState('');
   const [notes, setNotes] = useState('');
+  
+  // 1·2·3차 단계별 전형 일정
+  const [enableStages, setEnableStages] = useState(false);
+  const [stage1Name, setStage1Name] = useState('1차 서류/내신 발표');
+  const [stage1Date, setStage1Date] = useState('');
+  const [stage2Name, setStage2Name] = useState('2차 면접/실기평가');
+  const [stage2Date, setStage2Date] = useState('');
+  const [stage3Name, setStage3Name] = useState('3차 최종 합격자 발표');
+  const [stage3Date, setStage3Date] = useState('');
+
   const [loading, setLoading] = useState(false);
 
   const now = new Date();
@@ -68,6 +78,12 @@ export const ScheduleModal: React.FC<ScheduleModalProps> = ({
         apply_end_date: endDate,
         interview_date: interviewDate || null,
         result_date: resultDate || null,
+        stage1_name: enableStages && stage1Date ? (stage1Name.trim() || '1차 서류/내신 선발') : null,
+        stage1_date: enableStages && stage1Date ? stage1Date : null,
+        stage2_name: enableStages && stage2Date ? (stage2Name.trim() || '2차 면접/실기평가') : null,
+        stage2_date: enableStages && stage2Date ? stage2Date : null,
+        stage3_name: enableStages && stage3Date ? (stage3Name.trim() || '3차 최종 합격자 발표') : null,
+        stage3_date: enableStages && stage3Date ? stage3Date : null,
         notes: notes.trim() || null,
       });
 
@@ -80,6 +96,10 @@ export const ScheduleModal: React.FC<ScheduleModalProps> = ({
       setEndDate('');
       setInterviewDate('');
       setResultDate('');
+      setEnableStages(false);
+      setStage1Date('');
+      setStage2Date('');
+      setStage3Date('');
       setNotes('');
       onRefresh();
     } catch (err) {
@@ -275,6 +295,86 @@ export const ScheduleModal: React.FC<ScheduleModalProps> = ({
               />
             </div>
 
+            {/* 1·2·3차 다단계 전형 일정 설정 토글 (특목고, 외고, 자사고 등) */}
+            <div className="pt-2 border-t border-slate-200">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={enableStages}
+                  onChange={(e) => setEnableStages(e.target.checked)}
+                  className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
+                />
+                <span className="text-xs font-black text-indigo-950 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                  특목고·외고·자사고 1·2·3차 다단계 전형 일정 함께 등록하기
+                </span>
+              </label>
+
+              {enableStages && (
+                <div className="mt-2.5 p-3.5 bg-indigo-50/60 rounded-xl border border-indigo-200/80 space-y-2.5 animate-in fade-in duration-150">
+                  <p className="text-[11px] text-indigo-800 font-medium">
+                    1차(서류/내신 선발), 2차(심층 면접), 3차(최종 합격) 단계별 날짜를 지정하면 학생별 합격 현황과 연계됩니다.
+                  </p>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                    {/* Stage 1 */}
+                    <div className="bg-white p-2.5 rounded-lg border border-indigo-100 space-y-1">
+                      <span className="text-[11px] font-bold text-indigo-700 block">1단계 (서류/내신)</span>
+                      <input
+                        type="text"
+                        value={stage1Name}
+                        onChange={(e) => setStage1Name(e.target.value)}
+                        placeholder="전형명 (예: 1차 서류발표)"
+                        className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs"
+                      />
+                      <input
+                        type="date"
+                        value={stage1Date}
+                        onChange={(e) => setStage1Date(e.target.value)}
+                        className="w-full px-2 py-1 bg-white border border-slate-200 rounded text-xs font-mono"
+                      />
+                    </div>
+
+                    {/* Stage 2 */}
+                    <div className="bg-white p-2.5 rounded-lg border border-amber-100 space-y-1">
+                      <span className="text-[11px] font-bold text-amber-800 block">2단계 (면접/실기)</span>
+                      <input
+                        type="text"
+                        value={stage2Name}
+                        onChange={(e) => setStage2Name(e.target.value)}
+                        placeholder="전형명 (예: 2차 면접평가)"
+                        className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs"
+                      />
+                      <input
+                        type="date"
+                        value={stage2Date}
+                        onChange={(e) => setStage2Date(e.target.value)}
+                        className="w-full px-2 py-1 bg-white border border-slate-200 rounded text-xs font-mono"
+                      />
+                    </div>
+
+                    {/* Stage 3 */}
+                    <div className="bg-white p-2.5 rounded-lg border border-emerald-100 space-y-1">
+                      <span className="text-[11px] font-bold text-emerald-800 block">3단계 (최종발표)</span>
+                      <input
+                        type="text"
+                        value={stage3Name}
+                        onChange={(e) => setStage3Name(e.target.value)}
+                        placeholder="전형명 (예: 최종 합격발표)"
+                        className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs"
+                      />
+                      <input
+                        type="date"
+                        value={stage3Date}
+                        onChange={(e) => setStage3Date(e.target.value)}
+                        className="w-full px-2 py-1 bg-white border border-slate-200 rounded text-xs font-mono"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="flex justify-end gap-2 pt-1">
               <button
                 type="button"
@@ -347,6 +447,30 @@ export const ScheduleModal: React.FC<ScheduleModalProps> = ({
                         </span>
                       )}
                     </div>
+
+                    {(item.stage1_date || item.stage2_date || item.stage3_date) && (
+                      <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100">
+                        <span className="text-[10px] font-bold text-slate-400">단계별 일정:</span>
+                        {item.stage1_date && (
+                          <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200">
+                            <span className="font-bold">1차({item.stage1_name || '서류/내신'}):</span>
+                            <span className="font-mono">{item.stage1_date}</span>
+                          </span>
+                        )}
+                        {item.stage2_date && (
+                          <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200">
+                            <span className="font-bold">2차({item.stage2_name || '면접/실기'}):</span>
+                            <span className="font-mono">{item.stage2_date}</span>
+                          </span>
+                        )}
+                        {item.stage3_date && (
+                          <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
+                            <span className="font-bold">3차({item.stage3_name || '최종발표'}):</span>
+                            <span className="font-mono">{item.stage3_date}</span>
+                          </span>
+                        )}
+                      </div>
+                    )}
 
                     {item.notes && (
                       <p className="text-[11px] text-slate-500 bg-white p-2 rounded-xl border border-slate-200/60 mt-1">
